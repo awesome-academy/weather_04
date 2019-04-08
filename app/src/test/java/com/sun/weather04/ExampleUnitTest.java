@@ -1,4 +1,4 @@
-package com.framgia.weather04;
+package com.sun.weather04;
 
 import org.junit.Test;
 
