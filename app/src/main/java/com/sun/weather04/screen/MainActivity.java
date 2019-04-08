@@ -1,7 +1,8 @@
-package com.framgia.weather04;
+package com.sun.weather04.screen;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import com.sun.weather04.R;
 
 public class MainActivity extends AppCompatActivity {
 
