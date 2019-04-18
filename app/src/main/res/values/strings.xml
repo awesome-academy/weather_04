@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">Weather04</string>
+    <string name="search">Search</string>
+    <string name="location">Location</string>
+    <string name="time">Time and date</string>
+    <string name="summary">Summary</string>
+    <string name="temperature">Temperature</string>
+    <string name="see_detail">See detail</string>
+    <string name="wind_speed">Wind speed</string>
+    <string name="humid">Humid</string>
+    <string name="precip_probability">Precipitation probability</string>
+    <string name="text_see_detail">See detail</string>
 </resources>

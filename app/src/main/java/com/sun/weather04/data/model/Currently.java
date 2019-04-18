@@ -181,15 +181,15 @@ public class Currently {
 
 
     public final class CurrentlyEntry {
-        private static final String CLEAR_DAY = "clear-day";
-        private static final String CLEAR_NIGHT = "clear-night";
-        private static final String RAIN = "rain";
-        private static final String SNOW = "snow";
-        private static final String SLEET = "sleet";
-        private static final String WIND = "wind";
-        private static final String FOG = "fog";
-        private static final String CLOUDY = "cloudy";
-        private static final String PARTLY_CLOUDY_DAY = "partly-cloudy-day";
-        private static final String PARTLY_CLOUDY_NIGHT = "partly-cloudy-night";
+        public static final String CLEAR_DAY = "clear-day";
+        public static final String CLEAR_NIGHT = "clear-night";
+        public static final String RAIN = "rain";
+        public static final String SNOW = "snow";
+        public static final String SLEET = "sleet";
+        public static final String WIND = "wind";
+        public static final String FOG = "fog";
+        public static final String CLOUDY = "cloudy";
+        public static final String PARTLY_CLOUDY_DAY = "partly-cloudy-day";
+        public static final String PARTLY_CLOUDY_NIGHT = "partly-cloudy-night";
     }
 }

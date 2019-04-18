@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 
 import com.sun.weather04.R;
 import com.sun.weather04.screen.BaseActivity;
@@ -58,7 +57,7 @@ public class MainActivity extends BaseActivity implements LocationListener {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
                     if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5 * 1000*60, 1, this);
+                        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5 * 1000 * 60, 1, this);
                     }
                 } else {
                     finish();
@@ -71,7 +70,7 @@ public class MainActivity extends BaseActivity implements LocationListener {
     public void initData() {
         LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5 * 1000*60, 1, this);
+            lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5 * 1000 * 60, 1, this);
         }
     }
 
