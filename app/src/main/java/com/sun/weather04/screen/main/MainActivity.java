@@ -9,27 +9,40 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 
 import com.sun.weather04.R;
 import com.sun.weather04.screen.BaseActivity;
 import com.sun.weather04.screen.home.HomeFragment;
+import com.sun.weather04.screen.sevendaysnext.SevenDaysNextFragment;
 import com.sun.weather04.utils.Constant;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends BaseActivity implements LocationListener {
 
     private static final int REQUEST_PERMISSION_LOCATION = 10;
+    private ViewPager mImageViewPager;
+    private TabLayout mTabLayout;
+    private MainPagerAdapter mainPagerAdapter;
+    private List<Fragment> mListFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         initView();
         checkPermission();
         initData();
         initListener();
+
+        mainPagerAdapter = new MainPagerAdapter(getSupportFragmentManager(), mListFragment);
+        mImageViewPager.setAdapter(mainPagerAdapter);
+        mTabLayout.setupWithViewPager(mImageViewPager, true);
     }
 
     private void checkPermission() {
@@ -45,9 +58,8 @@ public class MainActivity extends BaseActivity implements LocationListener {
 
     @Override
     public void initView() {
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.add(R.id.frame_layout_home, new HomeFragment());
-        fragmentTransaction.commit();
+        mImageViewPager = findViewById(R.id.pager_main);
+        mTabLayout = findViewById(R.id.tab_dots_main);
     }
 
     @Override
@@ -57,7 +69,7 @@ public class MainActivity extends BaseActivity implements LocationListener {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
                     if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5 * 1000 * 60, 1, this);
+                        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, Constant.TIME_TO_UPDATE, Constant.DISTANCE_TO_UPDATE, this);
                     }
                 } else {
                     finish();
@@ -68,9 +80,12 @@ public class MainActivity extends BaseActivity implements LocationListener {
 
     @Override
     public void initData() {
+        mListFragment = new ArrayList<>();
+        mListFragment.add(new HomeFragment());
+        mListFragment.add(new SevenDaysNextFragment());
         LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5 * 1000 * 60, 1, this);
+            lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, Constant.TIME_TO_UPDATE, Constant.DISTANCE_TO_UPDATE, this);
         }
     }
 
