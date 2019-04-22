@@ -10,19 +10,26 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
-import android.util.Log;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sun.weather04.R;
 import com.sun.weather04.data.model.Currently;
 import com.sun.weather04.data.model.DataResponse;
 import com.sun.weather04.data.source.remote.WeatherRemoteDataSource;
 import com.sun.weather04.screen.BaseFragment;
+import com.sun.weather04.screen.today.TodayFragment;
 import com.sun.weather04.utils.Constant;
 
 import java.text.SimpleDateFormat;
@@ -32,7 +39,7 @@ import java.util.Objects;
 import static com.sun.weather04.data.repository.WeatherRepository.getInstance;
 
 
-public class HomeFragment extends BaseFragment implements HomeContract.View, LocationListener {
+public class HomeFragment extends BaseFragment implements HomeContract.View, LocationListener, SwipeRefreshLayout.OnRefreshListener, View.OnClickListener {
 
     private static final int REQUEST_PERMISSION_LOCATION = 10;
     private static final int TEMPERATURE_DIFFERENCE = 32;
@@ -49,10 +56,37 @@ public class HomeFragment extends BaseFragment implements HomeContract.View, Loc
     private double mLongitude = 0.0;
     private double mLatitude = 0.0;
 
+    private ImageButton mIbOption;
+    private Button mBtnSeeDetail;
+    private DrawerLayout mDrawerLayout;
+    private NavigationView mNavigationView;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+
+    @Override
+    public void onRefresh() {
+        initData();
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.btn_menu: {
+                mDrawerLayout.openDrawer(mNavigationView);
+                break;
+            }
+            case R.id.btn_see_detail: {
+                FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.replace(R.id.pager_main, new TodayFragment());
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
+                break;
+            }
+        }
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        initData();
     }
 
     @Override
@@ -61,6 +95,7 @@ public class HomeFragment extends BaseFragment implements HomeContract.View, Loc
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         checkPermission();
         initView(view);
+        initData();
         return view;
     }
 
@@ -80,6 +115,11 @@ public class HomeFragment extends BaseFragment implements HomeContract.View, Loc
         mTxtPrecipProbability = view.findViewById(R.id.tv_rain);
         mTxtWindSpeed = view.findViewById(R.id.tv_wind_speed);
         mIvIcon = view.findViewById(R.id.iv_summary_ic);
+        mIbOption = view.findViewById(R.id.btn_menu);
+        mDrawerLayout = view.findViewById(R.id.layoutDrawer);
+        mNavigationView = view.findViewById(R.id.nav_view);
+        mBtnSeeDetail = view.findViewById(R.id.btn_see_detail);
+        mSwipeRefreshLayout = view.findViewById(R.id.srl_swipe_refresh_layout_home);
     }
 
     @Override
@@ -87,7 +127,8 @@ public class HomeFragment extends BaseFragment implements HomeContract.View, Loc
         checkUpdateLocation();
         mHomePresenter = new HomePresenter(getInstance(new WeatherRemoteDataSource()));
         mHomePresenter.setView(this);
-        mHomePresenter.getWeatherData(mLongitude, mLatitude);
+        mHomePresenter.getWeatherData(Constant.LONGITUDE, Constant.LATITUDE);
+        mSwipeRefreshLayout.setRefreshing(true);
     }
 
     @Override
@@ -101,6 +142,8 @@ public class HomeFragment extends BaseFragment implements HomeContract.View, Loc
         setTemperature(dataResponse.getCurrently().getTemperature());
         setTime(dataResponse.getCurrently().getTime());
         setIcon(dataResponse.getCurrently().getIcon());
+
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
@@ -124,7 +167,6 @@ public class HomeFragment extends BaseFragment implements HomeContract.View, Loc
         }
     }
 
-
     @Override
     public void onLocationChanged(Location location) {
         mLongitude = location.getLongitude();
@@ -134,11 +176,15 @@ public class HomeFragment extends BaseFragment implements HomeContract.View, Loc
 
     @Override
     public void onGetDataResponseError(Exception e) {
-        Log.e(Constant.ON_GET_RESPONE_ERROR, e.toString());
+        Toast.makeText(getActivity(), getString(R.string.on_get_data_response_error), Toast.LENGTH_LONG).show();
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
     public void initListener() {
+        mIbOption.setOnClickListener(this);
+        mBtnSeeDetail.setOnClickListener(this);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
     }
 
     @Override

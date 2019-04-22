@@ -16,6 +16,7 @@
     <dimen name="dp_85">85dp</dimen>
     <dimen name="dp_100">100dp</dimen>
     <dimen name="dp_255">255dp</dimen>
+    <dimen name="dp_325">325dp</dimen>
     <dimen name="sp_16">16sp</dimen>
     <dimen name="sp_20">20sp</dimen>
     <dimen name="sp_55">55sp</dimen>
