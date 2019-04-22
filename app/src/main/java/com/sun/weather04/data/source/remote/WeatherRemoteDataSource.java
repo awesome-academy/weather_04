@@ -17,6 +17,7 @@ public class WeatherRemoteDataSource implements WeatherDataSource.RemoteDataSour
 
     @Override
     public void getWeatherData(OnFetchDataListener<DataResponse> listener, double longitude, double latitude) {
-        new GetCurrentlyWeatherAsyncTask(listener).execute(Constant.URL_CURRENT_WEATHER + "/"+longitude+ ","+ latitude);
+        new GetCurrentlyWeatherAsyncTask(listener).execute(Constant.URL_CURRENT_WEATHER + Constant.SLASH
+                + latitude + Constant.COMMA + longitude);
     }
 }
