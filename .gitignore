@@ -65,3 +65,4 @@ captures/
 /app/src/androidTest/java/com/framgia/weather04/ExampleInstrumentedTest.java
 app/libs/
 app/src/main/java/com/sun/weather04/data/source/local/
+/gradlew

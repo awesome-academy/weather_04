@@ -233,7 +233,7 @@
             android:layout_marginTop="@dimen/dp_80"/>
 
         <Switch
-            android:id="@+id/tv_wind_speed_option"
+            android:id="@+id/switch_wind_speed_option"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/wind_speed_option"
@@ -254,6 +254,7 @@
             android:layout_marginTop="@dimen/dp_245"/>
 
         <Switch
+            android:id="@+id/switch_temperature_option"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/dp_40"
             android:layout_marginTop="@dimen/dp_130"

@@ -18,9 +18,13 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +33,7 @@ import com.sun.weather04.data.model.Currently;
 import com.sun.weather04.data.model.DataResponse;
 import com.sun.weather04.data.source.remote.WeatherRemoteDataSource;
 import com.sun.weather04.screen.BaseFragment;
+import com.sun.weather04.screen.history.HistoryFragment;
 import com.sun.weather04.screen.today.TodayFragment;
 import com.sun.weather04.utils.Constant;
 
@@ -39,11 +44,12 @@ import java.util.Objects;
 import static com.sun.weather04.data.repository.WeatherRepository.getInstance;
 
 
-public class HomeFragment extends BaseFragment implements HomeContract.View, LocationListener, SwipeRefreshLayout.OnRefreshListener, View.OnClickListener {
+public class HomeFragment extends BaseFragment implements HomeContract.View, LocationListener, SwipeRefreshLayout.OnRefreshListener, View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
     private static final int REQUEST_PERMISSION_LOCATION = 10;
     private static final int TEMPERATURE_DIFFERENCE = 32;
     private static final double TEMPERATURE_RATIO = 1.8;
+    private static final double WIND_SPEED_RATIO = 3.6;
     private HomePresenter mHomePresenter;
     private TextView mTxtLocation;
     private TextView mTxtTime;
@@ -61,6 +67,14 @@ public class HomeFragment extends BaseFragment implements HomeContract.View, Loc
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
     private SwipeRefreshLayout mSwipeRefreshLayout;
+    private Switch mSwitchTemperature;
+    private Switch mSwitchWindSpeed;
+    private TextView mTvHomeOption;
+    private TextView mTvSearchOption;
+    private TextView mTvHistoryOption;
+    private EditText mEdSearch;
+
+    private DataResponse mDataResponse;
 
     @Override
     public void onRefresh() {
@@ -70,16 +84,60 @@ public class HomeFragment extends BaseFragment implements HomeContract.View, Loc
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.btn_menu: {
+            case R.id.btn_menu:
                 mDrawerLayout.openDrawer(mNavigationView);
                 break;
-            }
-            case R.id.btn_see_detail: {
-                FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.pager_main, new TodayFragment());
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
+            case R.id.btn_see_detail:
+                FragmentTransaction seeDetailFragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+                seeDetailFragmentTransaction.replace(R.id.pager_main, new TodayFragment());
+                seeDetailFragmentTransaction.addToBackStack(null);
+                seeDetailFragmentTransaction.commit();
                 break;
+            case R.id.tv_home_option:
+                mDrawerLayout.closeDrawer(mNavigationView);
+                break;
+            case R.id.tv_search_option:
+                mDrawerLayout.closeDrawer(mNavigationView);
+                mEdSearch.requestFocus();
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(mEdSearch, InputMethodManager.SHOW_IMPLICIT);
+                break;
+            case R.id.tv_history_option:
+                mDrawerLayout.closeDrawer(mNavigationView);
+                FragmentTransaction historyFragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+                historyFragmentTransaction.replace(R.id.pager_main, new HistoryFragment());
+                historyFragmentTransaction.addToBackStack(null);
+                historyFragmentTransaction.commit();
+                break;
+        }
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if (mDataResponse == null) {
+            Toast.makeText(getActivity(), getString(R.string.on_get_data_response_error),
+                    Toast.LENGTH_LONG).show();
+        } else {
+            switch (buttonView.getId()) {
+                case R.id.switch_temperature_option:
+                    if (!isChecked) {
+                        setTemperature(mDataResponse.getCurrently().getTemperature());
+                        break;
+                    } else {
+                        int temperature = (int) mDataResponse.getCurrently().getTemperature();
+                        mTxtTemperature.setText(String.format(Constant.STRING_DISPLAY_FORMAT,
+                                temperature, Constant.DEGREE_F));
+                        break;
+                    }
+                case R.id.switch_wind_speed_option:
+                    if (!isChecked) {
+                        setWindSpeed(mDataResponse.getCurrently().getWindSpeed());
+                        break;
+                    } else {
+                        mTxtWindSpeed.setText(String.format(Constant.STRING_DISPLAY_FORMAT,
+                                convertWindSpeed(mDataResponse.getCurrently().getWindSpeed()), Constant.M_S));
+                        break;
+                    }
             }
         }
     }
@@ -120,6 +178,12 @@ public class HomeFragment extends BaseFragment implements HomeContract.View, Loc
         mNavigationView = view.findViewById(R.id.nav_view);
         mBtnSeeDetail = view.findViewById(R.id.btn_see_detail);
         mSwipeRefreshLayout = view.findViewById(R.id.srl_swipe_refresh_layout_home);
+        mSwitchTemperature = view.findViewById(R.id.switch_temperature_option);
+        mSwitchWindSpeed = view.findViewById(R.id.switch_wind_speed_option);
+        mTvHomeOption = view.findViewById(R.id.tv_home_option);
+        mTvSearchOption = view.findViewById(R.id.tv_search_option);
+        mTvHistoryOption = view.findViewById(R.id.tv_history_option);
+        mEdSearch = view.findViewById(R.id.et_search);
     }
 
     @Override
@@ -129,11 +193,15 @@ public class HomeFragment extends BaseFragment implements HomeContract.View, Loc
         mHomePresenter.setView(this);
         mHomePresenter.getWeatherData(Constant.LONGITUDE, Constant.LATITUDE);
         mSwipeRefreshLayout.setRefreshing(true);
+        mTvHomeOption.setOnClickListener(this);
+        mTvSearchOption.setOnClickListener(this);
+        mTvHistoryOption.setOnClickListener(this);
     }
 
     @Override
     public void onGetDataResponseSuccess(DataResponse dataResponse) {
         if (dataResponse == null) return;
+        mDataResponse = dataResponse;
         setLocation(dataResponse.getTimezone());
         setSummary(dataResponse.getCurrently().getSummary());
         setWindSpeed(dataResponse.getCurrently().getWindSpeed());
@@ -150,7 +218,7 @@ public class HomeFragment extends BaseFragment implements HomeContract.View, Loc
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
-            case REQUEST_PERMISSION_LOCATION: {
+            case REQUEST_PERMISSION_LOCATION:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     LocationManager lm = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
                     if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
@@ -163,7 +231,6 @@ public class HomeFragment extends BaseFragment implements HomeContract.View, Loc
                 } else {
                     getActivity().finish();
                 }
-            }
         }
     }
 
@@ -185,6 +252,8 @@ public class HomeFragment extends BaseFragment implements HomeContract.View, Loc
         mIbOption.setOnClickListener(this);
         mBtnSeeDetail.setOnClickListener(this);
         mSwipeRefreshLayout.setOnRefreshListener(this);
+        mSwitchTemperature.setOnCheckedChangeListener(this);
+        mSwitchWindSpeed.setOnCheckedChangeListener(this);
     }
 
     @Override
@@ -282,7 +351,8 @@ public class HomeFragment extends BaseFragment implements HomeContract.View, Loc
     }
 
     private void setWindSpeed(double windSpeed) {
-        mTxtWindSpeed.setText(String.format(Constant.STRING_DISPLAY_FORMAT, windSpeed, Constant.KM_H));
+        int tmpWindSpeed = (int) windSpeed;
+        mTxtWindSpeed.setText(String.format(Constant.STRING_DISPLAY_FORMAT, tmpWindSpeed, Constant.KM_H));
     }
 
     private void setPrecipProbability(double precipProbability) {
@@ -295,5 +365,10 @@ public class HomeFragment extends BaseFragment implements HomeContract.View, Loc
 
     private void setTime(int time) {
         mTxtTime.setText(dateFormat(time));
+    }
+
+    private int convertWindSpeed(double k_m) {
+        double m_s = k_m / WIND_SPEED_RATIO;
+        return (int) m_s;
     }
 }
