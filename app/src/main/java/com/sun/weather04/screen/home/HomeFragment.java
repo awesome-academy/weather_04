@@ -225,8 +225,8 @@ public class HomeFragment extends BaseFragment implements HomeContract.View, Loc
                             == PackageManager.PERMISSION_GRANTED
                             && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
                             == PackageManager.PERMISSION_GRANTED) {
-                        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5 * 1000 * 60,
-                                1, this);
+                        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, Constant.TIME_TO_UPDATE,
+                                Constant.DISTANCE_TO_UPDATE, this);
                     }
                 } else {
                     getActivity().finish();
