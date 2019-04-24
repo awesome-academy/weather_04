@@ -18,4 +18,7 @@
     <string name="degree_F_option">\u2109</string>
     <string name="degree_C_option">\u2103</string>
     <string name="on_get_data_response_error">You must to connect the network</string>
+    <string name="seven_days_next">Seven days next</string>
+    <string name="day">Day</string>
+    <string name="precip">Precip</string>
 </resources>
